@@ -1,177 +1,225 @@
-# **Books Collection RESTful API**
+# Advanced RESTful API with RBAC and Authentication
 
-This project is a RESTful API built with Node.js and SQLite for managing a collection of books. It allows users to perform CRUD operations, validate data, and integrates a database for persistent storage. The API is deployed on [Render](https://render.com).
-
----
-
-## **Features**
-- Perform CRUD operations on books:
-  - **GET /books**: Fetch all books.
-  - **POST /books**: Add a new book.
-  - **PUT /books/:id**: Update a book by ID.
-  - **DELETE /books/:id**: Delete a book by ID.
-- Input validation using **Joi**.
-- SQLite integration for persistent storage.
-- Custom endpoints:
-  - **GET /books/recommendations**: Suggest a random book.
-  - **POST /books/favorite**: Mark a book as favorite.
-
----
-
-## **Technologies Used**
-- **Node.js**: Backend runtime.
-- **Express.js**: Web framework.
-- **SQLite**: Database for data persistence.
-- **Joi**: Data validation library.
-- **Nodemon**: Development utility for live reload.
-- **Render**: Cloud platform for deployment.
+## Table of Contents
+- [Overview](#overview)
+- [Features](#features)
+- [Technologies Used](#technologies-used)
+- [Installation](#installation)
+- [Environment Variables](#environment-variables)
+- [Database Setup](#database-setup)
+- [API Documentation](#api-documentation)
+  - [Authentication Routes](#authentication-routes)
+  - [Books Routes](#books-routes)
+  - [Custom Endpoint](#custom-endpoint)
+- [Testing with Postman](#testing-with-postman)
+- [Deployment](#deployment)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
-## **Setup Instructions**
+## Overview
+This project is a RESTful API for managing a book collection, extended to include authentication and role-based access control (RBAC). It allows users to perform CRUD operations on books, with restricted access based on roles (admin, user). Authentication is implemented using JSON Web Tokens (JWT), and sensitive data is securely managed with password hashing.
 
-### Prerequisites
-1. [Node.js](https://nodejs.org/) installed (v16 or newer recommended).
-2. [SQLite3](https://sqlite.org/index.html) installed (if using locally).
-3. [Postman](https://www.postman.com/) or any REST client for testing API endpoints.
+## Features
+- **CRUD Operations on Books**:
+  - Add, view, update, and delete books.
+- **Authentication**:
+  - User signup and login with JWT-based authentication.
+- **Role-Based Access Control**:
+  - Admin-specific routes.
+  - User-specific restrictions and access.
+- **Custom Endpoints**:
+  - Recommend books based on user preferences.
+- **Database Integration**:
+  - Persistent storage using SQLite.
+- **Data Validation**:
+  - Input validation using `Joi`.
 
 ---
 
-### Local Installation
-1. **Clone the Repository**:
+## Technologies Used
+- **Node.js**
+- **Express.js**
+- **SQLite**
+- **JWT (jsonwebtoken)**
+- **Bcrypt.js**
+- **Joi**
+
+---
+
+## Installation
+1. Clone the repository:
    ```bash
-   git clone https://github.com/Antishman/stage-two-task.git
+   git clone https://github.com/antishman/stage-two-task.git
    cd stage-two-task
    ```
 
-2. **Install Dependencies**:
+2. Install dependencies:
    ```bash
    npm install
    ```
 
-3. **Set Up the Database**:
-   Ensure the SQLite database file (`db/books.db`) exists. Create it manually if needed:
+3. Configure environment variables (see [Environment Variables](#environment-variables)).
+
+4. Start the server:
    ```bash
-   mkdir db
-   touch db/books.db
+   npm start
    ```
-
-4. **Run the Server**:
-   - Start the server normally:
-     ```bash
-     npm start
-     ```
-   - Start the server in development mode (with live reload):
-     ```bash
-     npm run dev
-     ```
-
-5. **Access the API**:
-   Open your browser or API testing tool (e.g., Postman) and navigate to:
-   ```
-   http://localhost:3000
-   ```
-
----
-
-### Deployment on Render
-1. **Push Code to GitHub**:
+   For development with live reloading:
    ```bash
-   git push origin main
+   npm run dev
    ```
 
-2. **Deploy on Render**:
-   - Create a new Web Service in your Render dashboard.
-   - Connect your GitHub repository.
-   - Add the following **postinstall** script in `package.json` to rebuild `sqlite3`:
-     ```json
-     "postinstall": "npm rebuild sqlite3"
-     ```
-
-3. **Access Deployed API**:
-   Render will provide a public URL for the API, e.g., `https://stage-two-task.onrender.com`.
-
 ---
 
-## **API Endpoints**
+## Environment Variables
+Create a `.env` file in the root directory and configure the following:
 
-### **Books Management**
-| Method | Endpoint                  | Description                      |
-|--------|---------------------------|----------------------------------|
-| GET    | `/books`                  | Fetch all books.                |
-| POST   | `/books`                  | Add a new book.                 |
-| PUT    | `/books/:id`              | Update a book by ID.            |
-| DELETE | `/books/:id`              | Delete a book by ID.            |
-
-### **Custom Endpoints**
-| Method | Endpoint                  | Description                      |
-|--------|---------------------------|----------------------------------|
-| GET    | `/books/recommendations`  | Suggest a random book.          |
-| POST   | `/books/favorite`         | Mark a book as favorite.        |
-
----
-
-## **Data Validation**
-All requests are validated using **Joi**. Validation rules:
-
-| Field            | Requirement                        |
-|-------------------|------------------------------------|
-| `title`          | Required, string.                 |
-| `author`         | Required, string.                 |
-| `isbn`           | Required, string, 13 characters.  |
-| `published_year` | Required, integer, 4 digits.      |
-
----
-
-## **Testing with Postman**
-1. Import the API into Postman by creating a new collection.
-2. Test each endpoint using appropriate HTTP methods and request bodies.
-3. Example:
-   - **POST /books**:
-     ```json
-     {
-         "title": "Sample Book",
-         "author": "Sample Author",
-         "isbn": "1234567890123",
-         "published_year": 2024
-     }
-     ```
-
----
-
-## **Project Structure**
+```env
+PORT=3000
+JWT_SECRET=your_jwt_secret_key
+DATABASE_URL=./database.sqlite
 ```
-.
-├── db
-│   └── books.db                # SQLite database file
-├── routes
-│   └── books.js                # API route definitions
-├── server.js                   # Main server file
-├── package.json                # Node.js configuration
-└── README.md                   # Project documentation
+
+- **PORT**: Port where the server will run.
+- **JWT_SECRET**: Secret key for JWT token generation.
+- **DATABASE_URL**: Path to the SQLite database file.
+
+---
+
+## Database Setup
+1. Initialize the database:
+   ```bash
+   npm run init-db
+   ```
+
+2. The database schema includes two tables:
+   - `users`: For managing user authentication and roles.
+   - `books`: For storing book details.
+
+### Database Schema
+```sql
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    role TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS books (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    author TEXT NOT NULL,
+    isbn TEXT NOT NULL UNIQUE,
+    published_year INTEGER NOT NULL,
+    user_id INTEGER,
+    FOREIGN KEY (user_id) REFERENCES users (id)
+);
 ```
 
 ---
 
-## **Known Issues**
-1. **SQLite on Render**:
-   SQLite databases on Render are ephemeral. Use Render's **persistent disk** or switch to PostgreSQL for production.
+## API Documentation
+### Authentication Routes
+#### POST `/auth/signup`
+**Description**: Register a new user.
 
-2. **Validation Errors**:
-   Ensure request bodies follow the validation schema to avoid `400 Bad Request` errors.
+**Request Body**:
+```json
+{
+  "username": "string",
+  "password": "string",
+  "role": "string" // Either "admin" or "user"
+}
+```
+
+**Response**:
+- **201 Created**: User successfully registered.
+- **400 Bad Request**: Missing or invalid fields.
+
+#### POST `/auth/login`
+**Description**: Authenticate a user and return a JWT.
+
+**Request Body**:
+```json
+{
+  "username": "string",
+  "password": "string"
+}
+```
+
+**Response**:
+- **200 OK**: Returns JWT.
+- **401 Unauthorized**: Invalid username or password.
+
+### Books Routes
+#### GET `/books`
+**Description**: Fetch books accessible to the authenticated user.
+
+**Response**:
+- **200 OK**: Returns a list of books.
+- **401 Unauthorized**: Missing or invalid JWT.
+
+#### POST `/books`
+**Description**: Add a new book (restricted to users).
+
+**Request Body**:
+```json
+{
+  "title": "string",
+  "author": "string",
+  "isbn": "string",
+  "published_year": "integer"
+}
+```
+
+**Response**:
+- **201 Created**: Book successfully added.
+- **400 Bad Request**: Missing or invalid fields.
+
+#### PUT `/books/:id`
+**Description**: Update a book by ID.
+
+**Response**:
+- **200 OK**: Book successfully updated.
+- **404 Not Found**: Book not found.
+- **401 Unauthorized**: Missing or invalid JWT.
+
+#### DELETE `/books/:id`
+**Description**: Delete a book by ID (restricted to admins).
+
+**Response**:
+- **200 OK**: Book successfully deleted.
+- **404 Not Found**: Book not found.
+- **401 Unauthorized**: Missing or invalid JWT.
+
+### Custom Endpoint
+#### GET `/books/recommendations`
+**Description**: Suggest books based on user preferences.
+
+**Response**:
+- **200 OK**: Returns a recommended book.
+
+
+
+## Deployment
+This API is deployed on [Render](https://render.com/).
+
+**Live URL**: [Your Render Deployment URL]
 
 ---
 
-## **Future Improvements**
-- Add user authentication for secure book management.
-- Integrate a frontend for easier interaction.
-- Switch to PostgreSQL for better scalability.
+## Contributing
+Contributions are welcome! Follow these steps to contribute:
+1. Fork the repository.
+2. Create a new branch: `git checkout -b feature-name`.
+3. Commit your changes: `git commit -m 'Add some feature'`.
+4. Push to the branch: `git push origin feature-name`.
+5. Open a pull request.
 
 ---
 
-## **License**
-This project is licensed under the **MIT License**. See the `LICENSE` file for details.
+## License
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
----
-
-Feel free to modify this template as needed! Let me know if you need additional sections.
