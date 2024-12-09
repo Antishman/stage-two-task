@@ -1,5 +1,5 @@
 const db = require('../db/database'); // SQLite database connection
-const bcrypt = require('bcrypt');
+const bcryptjs = require('bcryptjs');
 
 db.run(`
   CREATE TABLE IF NOT EXISTS users (
@@ -11,7 +11,7 @@ db.run(`
 `);
 
 const createUser = async (username, password, role = 'user') => {
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword = await bcryptjs.hash(password, 10);
   const query = `INSERT INTO users (username, password, role) VALUES (?, ?, ?)`;
   await db.run(query, [username, hashedPassword, role]);
 };
